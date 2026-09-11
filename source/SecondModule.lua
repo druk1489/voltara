@@ -1551,8 +1551,14 @@ creditsFolder.open()
 
 AntiAFK()
 
-for i,v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
-                    v:Disable()
+-- Solara не поддерживает getconnections; блокируем Idled только если функция есть
+if type(getconnections) == "function" then
+    local okConns = pcall(function()
+        for _, c in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
+            c:Disable()
+        end
+    end)
+    if not okConns then warn("[Voltara] getconnections unavailable, skipping idle-block") end
 end
 
 task.spawn(function()
