@@ -2201,8 +2201,8 @@ function X.LoadBlocks(blocksData, teamName, keybindsData, connectionsData)
                     task_spawn(function()
                         local t0 = os.clock()
                         pcall(remoteInvoke, buildingTool,
-                            blockType, blockCount, nil, nil,
-                            blockData.Anchored ~= false, cframe, secondaryCFrame)
+                            blockType, blockCount, zone, zoneCFrame:ToObjectSpace(cframe),
+                            blockData.Anchored ~= false, secondaryCFrame, cframe)
                         X.AutoTrackResponse(os.clock() - t0)
                         activeThreads = activeThreads - 1
                     end)
@@ -2218,8 +2218,8 @@ function X.LoadBlocks(blocksData, teamName, keybindsData, connectionsData)
             activeThreads = activeThreads + 1
             task_spawn(function()
                 local t0 = os.clock()
-                pcall(remoteInvoke, buildingTool, blockType, blockCount, nil, nil,
-                    blockData.Anchored ~= false, cframe)
+                pcall(remoteInvoke, buildingTool, blockType, blockCount, zone, zoneCFrame:ToObjectSpace(cframe),
+                    blockData.Anchored ~= false)
                 X.AutoTrackResponse(os.clock() - t0)
                 activeThreads = activeThreads - 1
             end)
