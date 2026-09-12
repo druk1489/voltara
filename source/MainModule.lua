@@ -4274,6 +4274,21 @@ local mainTab = window.new({ text = "Main" })
 
 mainTab:show()
 
+-- Кнопка открывает 2-й модуль (Voltara Second). Грузится один раз по клику.
+do
+    local secondFolder = mainTab.new("folder", { text = "Modules" })
+    secondFolder.new("button", {
+        text = "Open Voltara 2nd Module",
+    }).event:Connect(function()
+        if _G.VoltaraOpenSecond then
+            _G.VoltaraOpenSecond()
+        else
+            warn("[Voltara] open-fn not ready")
+        end
+    end)
+    secondFolder.open()
+end
+
 local fileDropdown
 local selectedFile
 local firstRefreshDone = false 

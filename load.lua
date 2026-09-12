@@ -86,7 +86,7 @@ if rawHttp then
     pcall(function() if http then http.request = patched end end)
 end
 
-local function loadEntry(name, relPath)
+local function loadModule(name, relPath)
     local body = rawget(DRUK .. relPath)
     if not body or #body < 50 then
         warn("[Voltara] FAILED: " .. relPath); return false
@@ -99,7 +99,15 @@ local function loadEntry(name, relPath)
     return true
 end
 
-loadEntry("VoltaraMain", "source/MainModule.lua")
-task.wait(0.3)
-loadEntry("VoltaraSecond", "source/SecondModule.lua")
-print("[Voltara] done. windows=" .. tostring(_libLoadCount))
+-- 2-й модуль открывается кнопкой в Main-окне (load один раз, повторно — показ окна)
+_G.VoltaraOpenSecond = function()
+    if _G.__VOLTARA_SECOND_LOADED then
+        print("[Voltara] 2nd module already loaded")
+        return
+    end
+    _G.__VOLTARA_SECOND_LOADED = true
+    loadModule("VoltaraSecond", "source/SecondModule.lua")
+end
+
+loadModule("VoltaraMain", "source/MainModule.lua")
+print("[Voltara] done. Открой 2-й модуль кнопкой в Main > Modules.")

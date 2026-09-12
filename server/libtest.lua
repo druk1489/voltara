@@ -1429,10 +1429,11 @@ local settings = {
                 self[l(i)] = v
             end
             
-            -- Override with provided options (type-safe)
+            -- Override with provided options (type-safe, но молча принимаем
+            -- неизвестные опции вроде value/floating, чтобы не спамить warn)
             for i, v in next, options do
                 local key = l(i)
-                if typeof(default[key]) == typeof(options[l(i)]) or typeof(options[l(i)]) == "nil" then
+                if default[key] == nil or typeof(default[key]) == typeof(options[l(i)]) or typeof(options[l(i)]) == "nil" then
                     self[key] = v
                 else
                     warn(string.format("Type mismatch for option '%s': expected %s, got %s", i, typeof(default[key]), typeof(v)))
