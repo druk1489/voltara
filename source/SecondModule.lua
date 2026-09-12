@@ -123,22 +123,34 @@ local function autoDismissResults()
     end
 end
 
--- Wait for character to be alive and ready, handles respawns
-local function waitForCharacter()
+-- Ждём живого персонажа с ТАЙМАУТОМ (раньше был вечный CharacterAdded:Wait(),
+-- из-за чего фарм намертво зависал после 1 круга и не перезапускался)
+local function waitForCharacter(maxWait)
     local plr = game.Players.LocalPlayer
-    local char = plr.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then
-        char = plr.CharacterAdded:Wait()
-        char:WaitForChild("HumanoidRootPart")
-        task.wait(0.5)
+    maxWait = maxWait or 12
+    local function alive(c)
+        local h = c and c:FindFirstChildOfClass("Humanoid")
+        return c and c:FindFirstChild("HumanoidRootPart") and h and h.Health > 0
     end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum and hum.Health <= 0 then
-        char = plr.CharacterAdded:Wait()
-        char:WaitForChild("HumanoidRootPart")
-        task.wait(0.5)
+    if alive(plr.Character) then return plr.Character end
+    local deadline = tick() + maxWait
+    while tick() < deadline do
+        if shouldStopFarming then return plr.Character end
+        if alive(plr.Character) then
+            task.wait(0.5)
+            return plr.Character
+        end
+        task.wait(0.3)
     end
-    return char
+    -- так и не респаунули сами — форсируем респаун
+    pcall(function() plr:LoadCharacter() end)
+    local d2 = tick() + 8
+    while tick() < d2 do
+        if shouldStopFarming then break end
+        if alive(plr.Character) then return plr.Character end
+        task.wait(0.3)
+    end
+    return plr.Character
 end
 
 -- Teleport with validation - retries if character dies or isn't at target
