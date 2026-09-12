@@ -3337,7 +3337,10 @@ end
 
 local imageCache = nil
 local lastUrl = nil
-local Image_Server_Url = "https://babftserver-production.up.railway.app/image"
+-- Локальный сервер-конвертер (source/server.py, Flask) по умолчанию на :5000.
+-- Поменяй SERVER_HOST, если сервер на другой машине/порту.
+local SERVER_HOST      = "http://127.0.0.1:5000"
+local Image_Server_Url = SERVER_HOST .. "/image"
 local imageUrl = nil
 local imageBlockType = "MetalBlock"
 local imageBlockSize = 0.5
@@ -5593,7 +5596,7 @@ local function generateQRPreview()
 
     local success, response = pcall(function()
         return request({
-            Url = "https://babftserver-production.up.railway.app/qr-code",
+            Url = SERVER_HOST .. "/qr-code",
             Method = "POST",
             Headers = {
                 ["Content-Type"] = "application/json",
@@ -5699,7 +5702,7 @@ local function listQRBlocks()
     
     local success, response = pcall(function()
         return request({
-            Url = "https://babftserver-production.up.railway.app/qr-code",
+            Url = SERVER_HOST .. "/qr-code",
             Method = "POST",
             Headers = {
                 ["Content-Type"] = "application/json",
@@ -5793,7 +5796,7 @@ local objSettings = {
     SmoothRotation = false,  -- align surface blocks to mesh surface normals
 }
 
-local OBJ_SERVER_URL = "https://babftserver3d-production.up.railway.app"
+local OBJ_SERVER_URL = SERVER_HOST
 
 local QUALITY_PRESETS = {
     LOW = { VoxelSize = 4.0, Description = "Blocky, fast" },
@@ -5818,7 +5821,7 @@ function X.SendOBJToServer(filePath, quality, fillInterior, closeGaps, smoothRot
         return nil
     end
 
-    endpoint = endpoint or "/voxelize"
+    endpoint = endpoint or "/obj-to-voxels-optimized"
     X.SetStatus("Sending to server...")
 
     local requestBody = {
@@ -6081,13 +6084,13 @@ function X.CountOBJBlocks()
 
     -- Use lightweight /count endpoint (no full voxel list returned = faster + less server memory)
     local voxelData = X.SendOBJToServer(
-        objSettings.SelectedFile,
-        objSettings.Quality,
-        objSettings.FillInterior,
-        objSettings.CloseGaps,
-        objSettings.SmoothRotation or false,
-        "/count"
-    )
+            objSettings.SelectedFile,
+            objSettings.Quality,
+            objSettings.FillInterior,
+            objSettings.CloseGaps,
+            objSettings.SmoothRotation or false,
+            "/obj-to-voxels-optimized"
+        )
 
     if not voxelData or not voxelData.voxel_count then
         X.SetStatus("Could not get block count")
